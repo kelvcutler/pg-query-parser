@@ -7,7 +7,7 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha --reporter dot test/setup.js test/test.js",
     "simpletest": "node_modules/.bin/mocha ./test/setup.js ./test/test.js ./test/elements/*.js",
-    "prepublish": "npm run lint && npm run clean && npm run build",
+    "prepublish": "npm run build",
     "lint": "node_modules/.bin/eslint src/* src/**/*",
     "build": "node_modules/.bin/babel src --out-dir dist --source-maps",
     "watch": "node_modules/.bin/babel src --out-dir dist --source-maps --watch",
@@ -48,7 +48,23 @@
   },
   "dependencies": {
     "lodash": "^4.13.1",
-    "pg-query-native": "^1.1.0"
+    "platform-dependent-modules": "0.0.14"
+  },
+  "config": {
+    "platformDependentModules": {
+      "linux": [
+        "pg-query-native"
+      ],
+      "darwin": [
+        "pg-query-native"
+      ],
+      "freebsd": [
+        "pg-query-native"
+      ],
+      "sunos": [
+        "pg-query-native"
+      ]
+    }
   },
   "keywords": [
     "sql",

@@ -1,6 +1,18 @@
-import { parse } from 'pg-query-native';
 import Deparser from './deparser';
 import { walk, all, first, tables, byType, clean } from './utils';
+
+var parse = null;
+
+if (process.platform === 'win32' || process.platform === 'x64') {
+  const {execSync} = require('child_process');
+  const escapeArgs = require('./escape-args');
+  parse = function (query) {
+    const parsed = execSync(`docker run -t pg-query-parser ${escapeArgs(query)}`).toString('utf8');
+    return {query: parsed};
+  };
+} else {
+  parse = require('bindings')('pg-query').parse;
+}
 
 const deparse = Deparser.deparse;
 

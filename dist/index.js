@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Deparser = exports.verify = exports.clean = exports.byType = exports.tables = exports.all = exports.first = exports.walk = exports.deparse = exports.parse = undefined;
 
-var _pgQueryNative = require('pg-query-native');
-
 var _deparser = require('./deparser');
 
 var _deparser2 = _interopRequireDefault(_deparser);
@@ -15,18 +13,34 @@ var _utils = require('./utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var parse = null;
+
+if (process.platform === 'win32' || process.platform === 'x64') {
+  var _require = require('child_process');
+
+  const execSync = _require.execSync;
+
+  const escapeArgs = require('./escape-args');
+  exports.parse = parse = function parse(query) {
+    const parsed = execSync(`docker run -t pg-query-parser ${escapeArgs(query)}`).toString('utf8');
+    return { query: parsed };
+  };
+} else {
+  exports.parse = parse = require('bindings')('pg-query').parse;
+}
+
 const deparse = _deparser2.default.deparse;
 
 const verify = query => {
-  const result = deparse((0, _pgQueryNative.parse)(query).query);
+  const result = deparse(parse(query).query);
 
-  const json1 = (0, _utils.clean)((0, _pgQueryNative.parse)(query).query);
-  const json2 = (0, _utils.clean)((0, _pgQueryNative.parse)(result).query);
+  const json1 = (0, _utils.clean)(parse(query).query);
+  const json2 = (0, _utils.clean)(parse(result).query);
 
   return JSON.stringify(json1) === JSON.stringify(json2);
 };
 
-exports.parse = _pgQueryNative.parse;
+exports.parse = parse;
 exports.deparse = deparse;
 exports.walk = _utils.walk;
 exports.first = _utils.first;
